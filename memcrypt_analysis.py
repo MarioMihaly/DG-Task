@@ -24,8 +24,9 @@ def isIncremental(buffer):
       Keyword arguments: 
       buffer -- the buffer to check for incremental values. 16-byte size buffers are passed in by default.
      """ 
+     # Check incremental status of consecutive values in buffer
      for idx in range(len(buffer) - 1):
-         if buffer[idx+1] - buffer[idx] != 1:
+         if buffer[idx+1] - buffer[idx] != 1: 
              return False
      return True
  
@@ -46,9 +47,11 @@ def decryptFile(candidates):
     """ 
     permu = list(permutations(candidates, 2)) #This function may be used to generate all permutations of candidate values.
     
+    # Note: '/' instead of '\' in path for runing project on WSL
     with open('data/encrypted_file', 'rb') as in_f:
         content = in_f.read()
         for key, iv in permu:
+            # Attempt decryption with each key-IV pair.
             try:
                 cipher = AES.new(key, AES.MODE_CBC, iv)
                 result = unpad(cipher.decrypt(content), AES.block_size)
@@ -57,7 +60,7 @@ def decryptFile(candidates):
                     with open('data/decrypted_file' + extension, 'wb') as out_f:
                         out_f.write(result)
                     print(f'key: {key}\nIV: {iv}')
-                    break
+                    break # Assumption: only a single key-IV pair results in successful decryption.
             except (KeyError, ValueError) as err:
                 continue
             
@@ -75,7 +78,7 @@ def isKnownHeader(buffer):
     if JPEG_HDR in buffer[0:len(JPEG_HDR)]:
         return True, '.jpg'
     if MS_OFFICE_HDR in buffer[0:len(MS_OFFICE_HDR)]:
-        return True, '.docx' # Assuming MS_OFFICE_HDR is for the MS Word documents
+        return True, '.docx' # Assumption: MS_OFFICE_HDR is for the MS Word documents
     if PNG_HDR in buffer[0:len(PNG_HDR)]:
         return True, '.png'
     if PDF_HDR in buffer[0:len(PDF_HDR)]:
@@ -105,7 +108,7 @@ def memoryAnalysis(file, offset):
 
 def main():
     #We begin by analysing the memory dump file. A list of candidate values will be returned by the function.
-    candidates = memoryAnalysis(r"data/memory_dump.bin", 16)
+    candidates = memoryAnalysis(r"data/memory_dump.bin", 16) # Note: '/' instead of '\' in path for runing project on WSL
     
     #We then attempt to decrypt the encypted_file by trying all possible permutation of candidate values.
     decryptFile(candidates)
