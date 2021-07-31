@@ -23,7 +23,10 @@ def isIncremental(buffer):
       Keyword arguments: 
       buffer -- the buffer to check for incremental values. 16-byte size buffers are passed in by default.
      """ 
-     pass
+     for idx in range(len(buffer) - 1):
+         if buffer[idx+1] - buffer[idx] != 1:
+             return False
+     return True
  
 def decryptFile(candidates):
     """TODO 2: Please implement a function which will:
@@ -84,7 +87,7 @@ def memoryAnalysis(file, offset):
 def main():
     #We begin by analysing the memory dump file. A list of candidate values will be returned by the function.
     candidates = memoryAnalysis(r"data/memory_dump.bin", 16)
-
+    
     #We then attempt to decrypt the encypted_file by trying all possible permutation of candidate values.
     decryptFile(candidates)
 
