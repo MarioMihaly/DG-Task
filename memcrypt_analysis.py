@@ -1,5 +1,6 @@
 from Cryptodome.Cipher import AES
 from itertools import permutations
+import os.path
 
 #Below are header values for common file types.
 JPEG_HDR = b'\xFF\xD8\xFF\xE0'
@@ -82,7 +83,7 @@ def memoryAnalysis(file, offset):
 
 def main():
     #We begin by analysing the memory dump file. A list of candidate values will be returned by the function.
-    candidates = memoryAnalysis(r"data\memory_dump.bin", 16)
+    candidates = memoryAnalysis(r"data/memory_dump.bin", 16)
 
     #We then attempt to decrypt the encypted_file by trying all possible permutation of candidate values.
     decryptFile(candidates)
