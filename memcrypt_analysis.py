@@ -46,15 +46,17 @@ def decryptFile(candidates):
     """ 
     permu = list(permutations(candidates, 2)) #This function may be used to generate all permutations of candidate values.
     
-    with open('data/encrypted_file', 'rb') as in_f, open('data/decrypted_file', 'wb') as out_f:
+    with open('data/encrypted_file', 'rb') as in_f:
         content = in_f.read()
         for key, iv in permu:
             try:
                 cipher = AES.new(key, AES.MODE_CBC, iv)
                 result = unpad(cipher.decrypt(content), AES.block_size)
-                if isKnownHeader(result):
+                valid, extension = isKnownHeader(result)
+                if valid:
+                    with open('data/decrypted_file' + extension, 'wb') as out_f:
+                        out_f.write(result)
                     print(f'key: {key}\nIV: {iv}')
-                    out_f.write(result)
                     break
             except (KeyError, ValueError) as err:
                 continue
@@ -66,16 +68,19 @@ def isKnownHeader(buffer):
 
      Keyword arguments: 
      buffer -- The buffer we wish to determine if decryption was successful.
+
+     Extension for return value:
+     Returns tuple containing result of matching and matched file extension.
     """ 
     if JPEG_HDR in buffer[0:len(JPEG_HDR)]:
-        return True
+        return True, '.jpg'
     if MS_OFFICE_HDR in buffer[0:len(MS_OFFICE_HDR)]:
-        return True
+        return True, '.docx' # Assuming MS_OFFICE_HDR is for the MS Word documents
     if PNG_HDR in buffer[0:len(PNG_HDR)]:
-        return True
+        return True, '.png'
     if PDF_HDR in buffer[0:len(PDF_HDR)]:
-        return True
-    return False
+        return True, '.pdf'
+    return False, None
 
 def memoryAnalysis(file, offset):
     """This function iterates through the memory_dump.bin file and reads the content (buffer) of the file at 16-byte offsets.
