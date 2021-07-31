@@ -1,4 +1,5 @@
 from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import unpad
 from itertools import permutations
 import os.path
 
@@ -44,7 +45,20 @@ def decryptFile(candidates):
      candidates -- The candidate keys and initialisation vectors (IVs) one wishes to test.
     """ 
     permu = list(permutations(candidates, 2)) #This function may be used to generate all permutations of candidate values.
-    pass
+    
+    with open('data/encrypted_file', 'rb') as in_f, open('data/decrypted_file', 'wb') as out_f:
+        content = in_f.read()
+        for key, iv in permu:
+            try:
+                cipher = AES.new(key, AES.MODE_CBC, iv)
+                result = unpad(cipher.decrypt(content), AES.block_size)
+                if isKnownHeader(result):
+                    print(f'key: {key}\nIV: {iv}')
+                    out_f.write(result)
+                    break
+            except (KeyError, ValueError) as err:
+                continue
+            
 
 def isKnownHeader(buffer):
     """This function performs analysis on the decrypted buffer to determine if it matches a known header (i.e. file type).
